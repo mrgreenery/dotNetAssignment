@@ -5,49 +5,49 @@ namespace InMemoryRepositories;
 
 public class CommentInMemoryRepository: ICommentRepository
 {
-    public List<Comment> comments;
+    public List<Comment> Comments;
 
     public CommentInMemoryRepository()
     {
-        comments = new List<Comment>();
+        Comments = new List<Comment>();
     }
     public Task<Comment> AddAsync(Comment comment)
     {
-        comment.Id = comments.Any()
-            ? comments.Max(c => c.Id) + 1
+        comment.Id = Comments.Any()
+            ? Comments.Max(c => c.Id) + 1
             : 1;
-        comments.Add(comment);
+        Comments.Add(comment);
         return Task.FromResult(comment);
     }
 
     public Task UpdateAsync(Comment comment)
     {
-        Comment? existingComment = comments.SingleOrDefault(c=> c.Id==comment.Id);
+        Comment? existingComment = Comments.SingleOrDefault(c=> c.Id==comment.Id);
         if (existingComment is null)
         {
             throw new InvalidOperationException(
                 $"Comment with ID {comment.Id} was not found");
         }
-        comments.Remove(existingComment);
-        comments.Add(comment);
+        Comments.Remove(existingComment);
+        Comments.Add(comment);
         return Task.CompletedTask;
     }
 
     public Task DeleteAsync(int id)
     {
-        Comment? commentToRemove = comments.SingleOrDefault(c => c.Id==id);
+        Comment? commentToRemove = Comments.SingleOrDefault(c => c.Id==id);
         if (commentToRemove is null)
         {
             throw new InvalidOperationException(
                 $"Comment with ID {id} was not found");
         }
-        comments.Remove(commentToRemove);
+        Comments.Remove(commentToRemove);
         return Task.CompletedTask;
     }
 
     public Task<Comment> GetSingleAsync(int id)
     {
-        Comment? comment = comments.SingleOrDefault(c => c.Id==id);
+        Comment? comment = Comments.SingleOrDefault(c => c.Id==id);
         if (comment is null) 
         { 
             throw new InvalidOperationException(
@@ -58,6 +58,6 @@ public class CommentInMemoryRepository: ICommentRepository
 
     public IQueryable<Comment> GetManyAsync()
     {
-        return comments.AsQueryable();
+        return Comments.AsQueryable();
     }
 }

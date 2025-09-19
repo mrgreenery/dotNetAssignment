@@ -9,17 +9,7 @@ public class CliApp(
     IUserRepository userRepository,
     ICommentRepository commentRepository,
     IPostRepository postRepository)
-{
-    private readonly IUserRepository _userRepository = userRepository;
-    private readonly ICommentRepository _commentRepository = commentRepository;
-    private readonly IPostRepository _postRepository = postRepository;
-    //
-    // private CreatePostView? createPostView;
-    // private SinglePostView? singlePostView;
-    // private CreateUserView? createUserView;
-    // private ListUsersView? listUsersView;
-    // private CreateCommentView? createCommentView;
-
+{ 
     public async Task StartAsync()
     { 
         while (true) 
@@ -33,22 +23,22 @@ public class CliApp(
                 {
                 case 1:
                     //instantiate the views here
-                    CreateUserView createUserView = new CreateUserView(_userRepository);
+                    CreateUserView createUserView = new CreateUserView(userRepository);
                     await createUserView.RunAsync();
                     break;
 
                 case 2:
-                    CreatePostView createPostView = new CreatePostView(_postRepository, userRepository);
+                    CreatePostView createPostView = new CreatePostView(postRepository, userRepository);
                     await createPostView.RunAsync();
                     break;
 
                 case 3:
-                    CreateCommentView createCommentView = new CreateCommentView(_postRepository, _commentRepository, userRepository);
+                    CreateCommentView createCommentView = new CreateCommentView(postRepository, commentRepository, userRepository);
                     await createCommentView.RunAsync();
                     break;
 
                 case 4:
-                    SinglePostView singlePostView = new SinglePostView(_postRepository, _commentRepository, _userRepository);
+                    SinglePostView singlePostView = new SinglePostView(postRepository,commentRepository, userRepository);
                     await singlePostView.RunAsync();
                     break;
 

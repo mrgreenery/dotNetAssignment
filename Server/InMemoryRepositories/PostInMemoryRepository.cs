@@ -5,11 +5,11 @@ namespace InMemoryRepositories;
 
 public class PostInMemoryRepository : IPostRepository
 {
-    public List<Post> posts;
+    public List<Post> Posts;
 
     public PostInMemoryRepository()
     {
-        posts = new List<Post>
+        Posts = new List<Post>
         {
             new Post("Welcome", "Sharp your C's and net your dots", DateTime.UtcNow)
             {
@@ -29,42 +29,42 @@ public class PostInMemoryRepository : IPostRepository
  
     public Task<Post> AddAsync(Post post)
     {
-        post.Id = posts.Any()
-            ? posts.Max(p => p.Id) + 1
+        post.Id = Posts.Any()
+            ? Posts.Max(p => p.Id) + 1
             : 1;
-        posts.Add(post);
+        Posts.Add(post);
         return Task.FromResult(post);
     }
 
     public Task UpdateAsync(Post post)
     {
-      Post? existingPost = posts.SingleOrDefault(p=> p.Id==post.Id);
+      Post? existingPost = Posts.SingleOrDefault(p=> p.Id==post.Id);
       if (existingPost is null)
       {
           throw new InvalidOperationException(
               $"Post with ID '{post.Id}' not found");
       }
-      posts.Remove(existingPost);
-      posts.Add(post);
+      Posts.Remove(existingPost);
+      Posts.Add(post);
       return Task.CompletedTask;
     }
 
     public Task DeleteAsync(int id)
     {
-        Post? postToRemove = posts.SingleOrDefault(p => p.Id == id);
+        Post? postToRemove = Posts.SingleOrDefault(p => p.Id == id);
         if (postToRemove is null)
         {
             throw new InvalidOperationException(
                 $"Post with ID '{id}' not found");
         }
 
-        posts.Remove(postToRemove);
+        Posts.Remove(postToRemove);
         return Task.CompletedTask;
     }
 
     public Task<Post> GetSingleAsync(int id)
     {
-        Post? post = posts.SingleOrDefault(p => p.Id == id);
+        Post? post = Posts.SingleOrDefault(p => p.Id == id);
         if (post is null)
         {
             throw new InvalidOperationException(
@@ -75,6 +75,6 @@ public class PostInMemoryRepository : IPostRepository
 
     public IQueryable<Post> GetManyAsync()
     {
-        return posts.AsQueryable();
+        return Posts.AsQueryable();
     }
 }

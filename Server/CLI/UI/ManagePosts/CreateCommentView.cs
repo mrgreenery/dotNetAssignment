@@ -3,14 +3,18 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManageComments;
 
-public class CreateCommentView(
-    IPostRepository postRepository,
-    ICommentRepository commentRepository,
-    IUserRepository userRepository)
+public class CreateCommentView
 {
-    private readonly IPostRepository _postRepository = postRepository ?? throw new ArgumentNullException(nameof(postRepository));
-    private readonly ICommentRepository _commentRepository = commentRepository ?? throw new ArgumentNullException(nameof(commentRepository));
-    private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+    private readonly IPostRepository _postRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly ICommentRepository _commentRepository;
+
+    public CreateCommentView(IPostRepository postRepository,  ICommentRepository commentRepository, IUserRepository userRepository)
+    {
+        this._postRepository = postRepository;
+        this._commentRepository = commentRepository;
+        this._userRepository = userRepository;
+    }
 
     public async Task RunAsync()
     {

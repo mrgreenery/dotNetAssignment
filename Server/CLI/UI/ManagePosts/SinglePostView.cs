@@ -2,14 +2,18 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManagePosts;
 
-public class SinglePostView(
-    IPostRepository postRepository,
-    ICommentRepository commentRepository,
-    IUserRepository userRepository)
+public class SinglePostView
 {
-    private readonly IPostRepository _postRepository = postRepository ?? throw new ArgumentNullException(nameof(postRepository));
-    private readonly ICommentRepository _commentRepository = commentRepository ?? throw new ArgumentNullException(nameof(commentRepository));
-    private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+    private readonly IPostRepository _postRepository;
+    private readonly ICommentRepository _commentRepository;
+    private readonly IUserRepository _userRepository;
+
+    public SinglePostView(IPostRepository postRepository, ICommentRepository commentRepository, IUserRepository userRepository)
+    {
+        this._postRepository = _postRepository;
+        this._commentRepository = _commentRepository;
+        this._userRepository = _userRepository;
+    }
 
     public async Task RunAsync()
     {

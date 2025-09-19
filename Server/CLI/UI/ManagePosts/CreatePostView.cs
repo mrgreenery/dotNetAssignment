@@ -3,8 +3,16 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManagePosts;
 
-public class CreatePostView(IPostRepository postRepository, IUserRepository userRepository)
+public class CreatePostView
 {
+    private readonly IPostRepository _postRepository;
+    private readonly IUserRepository _userRepository;
+
+    public CreatePostView(IPostRepository postRepository, IUserRepository userRepository)
+    {
+        this._postRepository = postRepository;
+        this._userRepository = userRepository;
+    }
     public async Task RunAsync()
     {
         Console.Clear();
@@ -25,7 +33,7 @@ public class CreatePostView(IPostRepository postRepository, IUserRepository user
         }
 
         //does user exist? 
-        bool userExists = userRepository
+        bool userExists = _userRepository
             .GetManyAsync()
             .Any(u => u.Id == userId);
 
@@ -39,7 +47,7 @@ public class CreatePostView(IPostRepository postRepository, IUserRepository user
 
         var newPost = new Post(title, body, now) { UserId = userId };
      
-        Post created = await postRepository.AddAsync(newPost);
+        Post created = await _postRepository.AddAsync(newPost);
         
         Console.WriteLine($"Post {created.Id} created");
         

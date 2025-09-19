@@ -3,8 +3,14 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManageUsers;
 
-public class CreateUserView(IUserRepository userRepository)
+public class CreateUserView
 {
+    private readonly IUserRepository _userRepository;
+
+    public CreateUserView(IUserRepository userRepository)
+    {
+        this._userRepository = userRepository;
+    }
     public async Task RunAsync()
     {
         Console.Clear();
@@ -17,10 +23,8 @@ public class CreateUserView(IUserRepository userRepository)
         
         var newUser = new User(username, password);
         
-        User created = await userRepository.AddAsync(newUser);
+        User created = await _userRepository.AddAsync(newUser);
         
         Console.WriteLine($"User {created.Id} created");
     }
-    
-    
-}
+    }
