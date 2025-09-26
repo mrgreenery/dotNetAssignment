@@ -3,28 +3,42 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManageUsers;
 
-public class CreateUserView
+public class CreateUserView(IUserRepository userRepository)
 {
-    private readonly IUserRepository _userRepository;
-
-    public CreateUserView(IUserRepository userRepository)
-    {
-        this._userRepository = userRepository;
-    }
     public async Task RunAsync()
     {
         Console.Clear();
         Console.WriteLine("----Create new user----");
         
         Console.Write("Enter username: ");
-        string username = Console.ReadLine();
+        string? username = Console.ReadLine();
         Console.Write("Enter password: ");
-        string password = Console.ReadLine();
-        
-        var newUser = new User(username, password);
-        
-        User created = await _userRepository.AddAsync(newUser);
-        
-        Console.WriteLine($"User {created.Id} created");
+        string? password = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            Console.WriteLine("Username cannot be empty.");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            Console.WriteLine("Password cannot be empty.");
+            return;
+        }
+        bool exists = userRepository
+            .GetManyAsync()
+            .Any(u => string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase));
+
+        if (exists)
+        {
+            Console.WriteLine("Username already exists.");
+            return;
+        }
+
+        // 3) Aanmaken
+        var newUser = new User(username.Trim(), password);
+        User created = await userRepository.AddAsync(newUser);
+
+        Console.WriteLine($"User {created.Id} ({created.Username}) created.");
     }
     }

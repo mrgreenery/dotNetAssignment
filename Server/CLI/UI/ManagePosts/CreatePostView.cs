@@ -3,26 +3,18 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManagePosts;
 
-public class CreatePostView
+public class CreatePostView(IPostRepository postRepository, IUserRepository userRepository)
 {
-    private readonly IPostRepository _postRepository;
-    private readonly IUserRepository _userRepository;
-
-    public CreatePostView(IPostRepository postRepository, IUserRepository userRepository)
-    {
-        this._postRepository = postRepository;
-        this._userRepository = userRepository;
-    }
     public async Task RunAsync()
     {
         Console.Clear();
         Console.WriteLine("----Create new post----");
         
         Console.Write("What is the title of you post: ");
-        string title = Console.ReadLine();
+        string? title = Console.ReadLine();
         
         Console.Write("Write your post: ");
-        string body = Console.ReadLine();
+        string? body = Console.ReadLine();
         
         Console.Write("User ID: ");
         var userIdText = Console.ReadLine();
@@ -31,9 +23,9 @@ public class CreatePostView
             Console.WriteLine("User ID must be a number.");
             return;
         }
-
+        
         //does user exist? 
-        bool userExists = _userRepository
+        bool userExists = userRepository
             .GetManyAsync()
             .Any(u => u.Id == userId);
 
@@ -43,11 +35,39 @@ public class CreatePostView
             return;
         }
         
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            Console.WriteLine("Title cannot be empty.");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            Console.WriteLine("Body cannot be empty.");
+            return;
+        }
+       
+        bool titleExists = postRepository
+            .GetManyAsync()
+            .Any(p => string.Equals(p.Title, title, StringComparison.OrdinalIgnoreCase));
+
+        if (titleExists)
+        {
+            Console.WriteLine("A post with this title already exists.");
+            return;
+        }
+
         var now = DateTime.Now;
 
-        var newPost = new Post(title, body, now) { UserId = userId };
+        var newPost = new Post
+        {
+            Title = title.Trim(),
+            Body = body,
+            UserId = userId,
+            Created = DateTime.Now,
+            Updated = DateTime.Now
+        };
      
-        Post created = await _postRepository.AddAsync(newPost);
+        Post created = await postRepository.AddAsync(newPost);
         
         Console.WriteLine($"Post {created.Id} created");
         

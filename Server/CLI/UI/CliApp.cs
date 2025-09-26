@@ -15,7 +15,7 @@ public class CliApp(
         while (true) 
         { 
             PrintMenu();
-            int choice = ReadMenuChoice(1, 6);
+            int choice = ReadMenuChoice(1, 5);
             
             try 
             { 
@@ -66,7 +66,7 @@ private static void PrintMenu()
     Console.WriteLine("3. Add a comment to a post");
     Console.WriteLine("4. Show all posts");
     Console.WriteLine("5. Exit");
-    Console.Write("\nChoose a number (1–6) and press ENTER: ");
+    Console.Write("\nChoose a number (1–5) and press ENTER: ");
 }
 
 private static int ReadMenuChoice(int min, int max)

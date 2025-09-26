@@ -20,17 +20,17 @@ public class UserFileRepository: IUserRepository
         string usersAsJson = await File.ReadAllTextAsync(_filePath);
         List<User> users = JsonSerializer.Deserialize<List<User>>(usersAsJson)!;
         
-        if (users.Count != 0)
+        bool exists = users.Any(u => string.Equals(u.Username, user.Username, StringComparison.OrdinalIgnoreCase));
+        if (exists) 
         {
-            users =  new List<User>();
+            throw new InvalidOperationException($"Username '{user.Username}' already exists."); 
         }
-        
+
         int maxId = users.Count > 0 ? users.Max(c => c.Id) : 0;
         user.Id = maxId + 1;
         
         users.Add(user);
         usersAsJson = JsonSerializer.Serialize(users);
-        
         await File.WriteAllTextAsync(_filePath, usersAsJson);
         return user;
     }

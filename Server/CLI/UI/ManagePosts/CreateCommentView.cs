@@ -3,26 +3,18 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManageComments;
 
-public class CreateCommentView
+public class CreateCommentView(
+    IPostRepository postRepository,
+    ICommentRepository commentRepository,
+    IUserRepository userRepository)
 {
-    private readonly IPostRepository _postRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly ICommentRepository _commentRepository;
-
-    public CreateCommentView(IPostRepository postRepository,  ICommentRepository commentRepository, IUserRepository userRepository)
-    {
-        this._postRepository = postRepository;
-        this._commentRepository = commentRepository;
-        this._userRepository = userRepository;
-    }
-
     public async Task RunAsync()
     {
         Console.Clear();
         Console.WriteLine("=== Add Comment to Post ===\n");
 
         //show posts
-        var posts = _postRepository.GetManyAsync().OrderBy(p => p.Id).ToList();
+        var posts = postRepository.GetManyAsync().OrderBy(p => p.Id).ToList();
         if (posts.Count == 0)
         {
             Console.WriteLine("No posts available yet.");
@@ -66,7 +58,7 @@ public class CreateCommentView
             Updated = DateTime.UtcNow
         };
 
-        var created = await _commentRepository.AddAsync(comment);
+        var created = await commentRepository.AddAsync(comment);
         Console.WriteLine($"\nComment #{created.Id} added to Post #{post.Id} by User #{user.Id}.");
     }
 
@@ -96,13 +88,13 @@ public class CreateCommentView
 
     private async Task<Post?> TryGetPostAsync(int id)
     {
-        try { return await _postRepository.GetSingleAsync(id); }
+        try { return await postRepository.GetSingleAsync(id); }
         catch { return null; }
     }
 
     private async Task<User?> TryGetUserAsync(int id)
     {
-        try { return await _userRepository.GetSingleAsync(id); }
+        try { return await userRepository.GetSingleAsync(id); }
         catch { return null; }
     }
 }

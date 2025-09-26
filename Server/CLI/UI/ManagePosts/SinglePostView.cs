@@ -2,26 +2,18 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManagePosts;
 
-public class SinglePostView
+public class SinglePostView(
+    IPostRepository postRepository,
+    ICommentRepository commentRepository,
+    IUserRepository userRepository)
 {
-    private readonly IPostRepository _postRepository;
-    private readonly ICommentRepository _commentRepository;
-    private readonly IUserRepository _userRepository;
-
-    public SinglePostView(IPostRepository postRepository, ICommentRepository commentRepository, IUserRepository userRepository)
-    {
-        this._postRepository = _postRepository;
-        this._commentRepository = _commentRepository;
-        this._userRepository = _userRepository;
-    }
-
     public async Task RunAsync()
     {
         Console.Clear();
         Console.WriteLine("---- View Post ----\n");
 
         // show posts
-        var posts = _postRepository.GetManyAsync().OrderBy(p => p.Id).ToList();
+        var posts = postRepository.GetManyAsync().OrderBy(p => p.Id).ToList();
         if (posts.Count == 0)
         {
             Console.WriteLine("No posts available.");
@@ -52,8 +44,8 @@ public class SinglePostView
         Console.WriteLine($"Created: {post.Created} | Updated: {post.Updated} | Author: User #{post.UserId}\n");
 
         // get comments
-        var users = _userRepository.GetManyAsync().ToList();
-        var comments = _commentRepository.GetManyAsync()
+        var users = userRepository.GetManyAsync().ToList();
+        var comments = commentRepository.GetManyAsync()
             .Where(c => c.PostId == postId)
             .OrderBy(c => c.Id)
             .ToList();
@@ -76,7 +68,7 @@ public class SinglePostView
 
     private async Task<Entities.Post?> TryGetPostAsync(int id)
     {
-        try { return await _postRepository.GetSingleAsync(id); }
+        try { return await postRepository.GetSingleAsync(id); }
         catch { return null; }
     }
 

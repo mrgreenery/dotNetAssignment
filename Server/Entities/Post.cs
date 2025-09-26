@@ -1,11 +1,18 @@
+using System.Text.Json.Serialization;
+
 namespace Entities;
 
-public class Post(string title, string body, DateTime createdDate)
+using System.Text.Json.Serialization;
+
+public class Post
 {
+    [JsonConstructor]
+    public Post() {} 
+
     public int Id { get; set; }
-    public string Title { get; set; } = title;
-    public string Body { get; set; } = body;
-    public DateTime Created { get; set; } = createdDate.ToLocalTime();
-    public DateTime Updated { get; set; } = createdDate.ToLocalTime();
+    public required string Title { get; set; }
+    public required string Body { get; set; }
+    public DateTime Created { get; set; }
+    public DateTime Updated { get; set; }
     public int UserId { get; set; }
 }
