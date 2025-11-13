@@ -28,7 +28,7 @@ public class CreateUserView(IUserRepository userRepository)
             return;
         }
         bool exists = userRepository
-            .GetManyAsync()
+            .GetManyUsersAsync()
             .Any(u => string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase));
 
         if (exists)
@@ -39,7 +39,7 @@ public class CreateUserView(IUserRepository userRepository)
 
         //create
         var newUser = new User(username.Trim(), password);
-        User created = await userRepository.AddAsync(newUser);
+        User created = await userRepository.AddUserAsync(newUser);
 
         Console.WriteLine($"User {created.Id} ({created.Username}) created.");
     }

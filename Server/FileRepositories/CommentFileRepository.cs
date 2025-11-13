@@ -15,7 +15,7 @@ public class CommentFileRepository : ICommentRepository
             File.WriteAllText(_filePath, "[]");// contents is empty collection in json
         }
     }
-    public async Task<Comment> AddAsync(Comment comment) 
+    public async Task<Comment> AddCommentAsync(Comment comment) 
     {
         string commentsAsJson = await File.ReadAllTextAsync(_filePath); //read content from the file in json
         List<Comment> comments = JsonSerializer.Deserialize<List<Comment>>(commentsAsJson)!; //json deserialized into list of comments
@@ -35,7 +35,7 @@ public class CommentFileRepository : ICommentRepository
         return comment; //return the finalized comment that now has an ID
     }
 
-    public async Task UpdateAsync(Comment comment)
+    public async Task UpdateCommentAsync(Comment comment)
     {
         string commentsAsJson = await File.ReadAllTextAsync(_filePath); 
         List<Comment> comments = JsonSerializer.Deserialize<List<Comment>>(commentsAsJson)!;
@@ -49,7 +49,7 @@ public class CommentFileRepository : ICommentRepository
         }
     }
     
-    public async Task DeleteAsync(int id)
+    public async Task DeleteCommentAsync(int id)
     {
         string commentsAsJson = await File.ReadAllTextAsync(_filePath); 
         List<Comment> comments = JsonSerializer.Deserialize<List<Comment>>(commentsAsJson)!;
@@ -63,7 +63,7 @@ public class CommentFileRepository : ICommentRepository
         }
     }
 
-    public async Task<Comment> GetSingleAsync(int id)
+    public async Task<Comment> GetSingleCommentAsync(int id)
     {
         string commentsAsJson = await File.ReadAllTextAsync(_filePath);
         List<Comment> comments = JsonSerializer.Deserialize<List<Comment>>(commentsAsJson)!;
@@ -71,7 +71,7 @@ public class CommentFileRepository : ICommentRepository
         return comments.Single(c => c.Id == id);
     }
 
-    public IQueryable<Comment> GetManyAsync()
+    public IQueryable<Comment> GetManyCommentsAsync()
     {
         string commentsAsJson = File.ReadAllTextAsync(_filePath).Result; 
         List<Comment> comments = JsonSerializer.Deserialize<List<Comment>>(commentsAsJson)!; 

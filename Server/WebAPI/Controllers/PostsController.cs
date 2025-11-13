@@ -31,7 +31,7 @@ public class PostsController : ControllerBase
                 Updated = DateTime.UtcNow
             };
 
-            Post created = await _postRepository.AddAsync(post);
+            Post created = await _postRepository.AddPostAsync(post);
 
             PostDto dto = new PostDto
             {
@@ -56,7 +56,7 @@ public class PostsController : ControllerBase
     {
         try
         {
-            Post post = await _postRepository.GetSingleAsync(id);
+            Post post = await _postRepository.GetSinglePostAsync(id);
             PostDto dto = new()
             {
                 Id = post.Id,
@@ -82,7 +82,7 @@ public class PostsController : ControllerBase
     {
         try
         {
-            var postsQuery = _postRepository.GetManyAsync();
+            var postsQuery = _postRepository.GetManyPostsAsync();
 
             if (!string.IsNullOrEmpty(title))
             {
@@ -121,7 +121,7 @@ public class PostsController : ControllerBase
     {
         try
         {
-            Post post = await _postRepository.GetSingleAsync(id);
+            Post post = await _postRepository.GetSinglePostAsync(id);
     
             // Update title if provided
             if (!string.IsNullOrWhiteSpace(request.Title))
@@ -138,7 +138,7 @@ public class PostsController : ControllerBase
             // Always update the Updated timestamp
             post.Updated = DateTime.UtcNow;
     
-            await _postRepository.UpdateAsync(post);
+            await _postRepository.UpdatePostAsync(post);
             return NoContent();
         }
         catch (Exception e)
@@ -152,8 +152,8 @@ public class PostsController : ControllerBase
     {
         try
         {
-            Post post = await _postRepository.GetSingleAsync(id);
-            await _postRepository.DeleteAsync(id);
+            Post post = await _postRepository.GetSinglePostAsync(id);
+            await _postRepository.DeletePostAsync(id);
             return NoContent();
         }
         catch (Exception e)

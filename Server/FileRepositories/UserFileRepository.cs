@@ -15,7 +15,7 @@ public class UserFileRepository: IUserRepository
             File.WriteAllText(_filePath, "[]");
         }
     }
-    public async Task<User> AddAsync(User user)
+    public async Task<User> AddUserAsync(User user)
     {
         string usersAsJson = await File.ReadAllTextAsync(_filePath);
         List<User> users = JsonSerializer.Deserialize<List<User>>(usersAsJson)!;
@@ -35,9 +35,9 @@ public class UserFileRepository: IUserRepository
         return user;
     }
 
-    public async Task UpdateAsync(User user)
+    public async Task UpdateUserAsync(User user)
     {
-        string  usersAsJson = await File.ReadAllTextAsync(_filePath);
+        string usersAsJson = await File.ReadAllTextAsync(_filePath);
         List<User> users = JsonSerializer.Deserialize<List<User>>(usersAsJson)!;
         
         int index = users.FindIndex(c => c.Id == user.Id);
@@ -45,11 +45,11 @@ public class UserFileRepository: IUserRepository
         {
             users[index] = user;
             usersAsJson = JsonSerializer.Serialize(users);
-            await File.WriteAllTextAsync(_filePath, JsonSerializer.Serialize(users));
+            await File.WriteAllTextAsync(_filePath, usersAsJson);
         }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteUserAsync(int id)
     {
         string usersAsJson = await File.ReadAllTextAsync(_filePath);
         List<User> users = JsonSerializer.Deserialize<List<User>>(usersAsJson)!;
@@ -63,7 +63,7 @@ public class UserFileRepository: IUserRepository
         }
     }
 
-    public async Task<User> GetSingleAsync(int id)
+    public async Task<User> GetSingleUserAsync(int id)
     {
         string usersAsJson = await File.ReadAllTextAsync(_filePath);
         List<User> users = JsonSerializer.Deserialize<List<User>>(usersAsJson)!;
@@ -71,7 +71,7 @@ public class UserFileRepository: IUserRepository
         return users.Single(c => c.Id == id);
     }
 
-    public IQueryable<User> GetManyAsync()
+    public IQueryable<User> GetManyUsersAsync()
     {
         string  usersAsJson = File.ReadAllText(_filePath);
         List<User> users = JsonSerializer.Deserialize<List<User>>(usersAsJson)!;

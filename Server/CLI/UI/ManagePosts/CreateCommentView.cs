@@ -14,7 +14,7 @@ public class CreateCommentView(
         Console.WriteLine("=== Add Comment to Post ===\n");
 
         //show posts
-        var posts = postRepository.GetManyAsync().OrderBy(p => p.Id).ToList();
+        var posts = postRepository.GetManyPostsAsync().OrderBy(p => p.Id).ToList();
         if (posts.Count == 0)
         {
             Console.WriteLine("No posts available yet.");
@@ -58,7 +58,7 @@ public class CreateCommentView(
             Updated = DateTime.UtcNow
         };
 
-        var created = await commentRepository.AddAsync(comment);
+        var created = await commentRepository.AddCommentAsync(comment);
         Console.WriteLine($"\nComment #{created.Id} added to Post #{post.Id} by User #{user.Id}.");
     }
 
@@ -88,13 +88,13 @@ public class CreateCommentView(
 
     private async Task<Post?> TryGetPostAsync(int id)
     {
-        try { return await postRepository.GetSingleAsync(id); }
+        try { return await postRepository.GetSinglePostAsync(id); }
         catch { return null; }
     }
 
     private async Task<User?> TryGetUserAsync(int id)
     {
-        try { return await userRepository.GetSingleAsync(id); }
+        try { return await userRepository.GetSingleUserAsync(id); }
         catch { return null; }
     }
 }

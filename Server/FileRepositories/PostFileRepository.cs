@@ -15,7 +15,7 @@ public class PostFileRepository: IPostRepository
             File.WriteAllText(_filePath, "[]");
         }
     }
-    public async Task<Post> AddAsync(Post post)
+    public async Task<Post> AddPostAsync(Post post)
     {
         string postsAsJson = await File.ReadAllTextAsync(_filePath);
         List<Post> posts = JsonSerializer.Deserialize<List<Post>>(postsAsJson)!;
@@ -35,7 +35,7 @@ public class PostFileRepository: IPostRepository
         return post;
     }
 
-    public async Task UpdateAsync(Post post)
+    public async Task UpdatePostAsync(Post post)
     {
         string postsAsJson = await File.ReadAllTextAsync(_filePath); 
         List<Post> posts = JsonSerializer.Deserialize<List<Post>>(postsAsJson)!;
@@ -49,7 +49,7 @@ public class PostFileRepository: IPostRepository
         }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeletePostAsync(int id)
     {
         string postsAsJson = await  File.ReadAllTextAsync(_filePath);
         List<Post> posts = JsonSerializer.Deserialize<List<Post>>(postsAsJson)!;
@@ -63,7 +63,7 @@ public class PostFileRepository: IPostRepository
         }
     }
 
-    public async Task<Post> GetSingleAsync(int id)
+    public async Task<Post> GetSinglePostAsync(int id)
     {
         string postsAsJson = await  File.ReadAllTextAsync(_filePath);
         List<Post> posts = JsonSerializer.Deserialize<List<Post>>(postsAsJson)!;
@@ -71,7 +71,7 @@ public class PostFileRepository: IPostRepository
         return posts.Single(p => p.Id == id) ?? throw new InvalidOperationException();
     }
 
-    public IQueryable<Post> GetManyAsync()
+    public IQueryable<Post> GetManyPostsAsync()
     {
         string postsAsJson = File.ReadAllTextAsync(_filePath).Result;
         List<Post> posts = JsonSerializer.Deserialize<List<Post>>(postsAsJson)!;

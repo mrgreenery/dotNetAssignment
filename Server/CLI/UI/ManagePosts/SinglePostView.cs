@@ -13,7 +13,7 @@ public class SinglePostView(
         Console.WriteLine("---- View Post ----\n");
 
         // show posts
-        var posts = postRepository.GetManyAsync().OrderBy(p => p.Id).ToList();
+        var posts = postRepository.GetManyPostsAsync().OrderBy(p => p.Id).ToList();
         if (posts.Count == 0)
         {
             Console.WriteLine("No posts available.");
@@ -44,8 +44,8 @@ public class SinglePostView(
         Console.WriteLine($"Created: {post.Created} | Updated: {post.Updated} | Author: User #{post.UserId}\n");
 
         // get comments
-        var users = userRepository.GetManyAsync().ToList();
-        var comments = commentRepository.GetManyAsync()
+        var users = userRepository.GetManyUsersAsync().ToList();
+        var comments = commentRepository.GetManyCommentsAsync()
             .Where(c => c.PostId == postId)
             .OrderBy(c => c.Id)
             .ToList();
@@ -68,7 +68,7 @@ public class SinglePostView(
 
     private async Task<Entities.Post?> TryGetPostAsync(int id)
     {
-        try { return await postRepository.GetSingleAsync(id); }
+        try { return await postRepository.GetSinglePostAsync(id); }
         catch { return null; }
     }
 

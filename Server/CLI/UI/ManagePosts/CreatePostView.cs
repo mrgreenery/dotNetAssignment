@@ -26,7 +26,7 @@ public class CreatePostView(IPostRepository postRepository, IUserRepository user
         
         //does user exist? 
         bool userExists = userRepository
-            .GetManyAsync()
+            .GetManyUsersAsync()
             .Any(u => u.Id == userId);
 
         if (!userExists)
@@ -47,7 +47,7 @@ public class CreatePostView(IPostRepository postRepository, IUserRepository user
         }
        
         bool titleExists = postRepository
-            .GetManyAsync()
+            .GetManyPostsAsync()
             .Any(p => string.Equals(p.Title, title, StringComparison.OrdinalIgnoreCase));
 
         if (titleExists)
@@ -67,7 +67,7 @@ public class CreatePostView(IPostRepository postRepository, IUserRepository user
             Updated = DateTime.Now
         };
      
-        Post created = await postRepository.AddAsync(newPost);
+        Post created = await postRepository.AddPostAsync(newPost);
         
         Console.WriteLine($"Post {created.Id} created");
         

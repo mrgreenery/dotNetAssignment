@@ -32,7 +32,7 @@ public class CommentsController : ControllerBase
                 Updated = DateTime.UtcNow
             };
 
-            Comment created = await _commentRepository.AddAsync(comment);
+            Comment created = await _commentRepository.AddCommentAsync(comment);
 
             CommentDto dto = new CommentDto
             {
@@ -58,7 +58,7 @@ public class CommentsController : ControllerBase
     {
         try
         {
-            Comment comment = await _commentRepository.GetSingleAsync(id);
+            Comment comment = await _commentRepository.GetSingleCommentAsync(id);
             CommentDto dto = new CommentDto
             {
                 Id = comment.Id,
@@ -85,7 +85,7 @@ public class CommentsController : ControllerBase
     {
         try
         {
-            var commentsQuery = _commentRepository.GetManyAsync();
+            var commentsQuery = _commentRepository.GetManyCommentsAsync();
 
             if (userId.HasValue)
             {
@@ -124,7 +124,7 @@ public class CommentsController : ControllerBase
     {
         try
         {
-            Comment comment = await _commentRepository.GetSingleAsync(id);
+            Comment comment = await _commentRepository.GetSingleCommentAsync(id);
 
             if (!string.IsNullOrWhiteSpace(request.Title))
             {
@@ -138,7 +138,7 @@ public class CommentsController : ControllerBase
 
             comment.Updated = DateTime.UtcNow;
 
-            await _commentRepository.UpdateAsync(comment);
+            await _commentRepository.UpdateCommentAsync(comment);
             return NoContent();
         }
         catch (Exception e)
@@ -152,8 +152,8 @@ public class CommentsController : ControllerBase
     {
         try
         {
-            Comment comment = await _commentRepository.GetSingleAsync(id);
-            await _commentRepository.DeleteAsync(id);
+            Comment comment = await _commentRepository.GetSingleCommentAsync(id);
+            await _commentRepository.DeleteCommentAsync(id);
             return NoContent();
         }
         catch (Exception e)

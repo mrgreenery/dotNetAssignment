@@ -25,7 +25,7 @@ public class UsersController: ControllerBase
         await VerifyUserNameIsAvailableAsync(request.UserName);
 
         User user = new(request.UserName, request.Password);
-        User created = await _userRepository.AddAsync(user);
+        User created = await _userRepository.AddUserAsync(user);
         UserDto dto = new()
         {
             Id = created.Id,
@@ -39,7 +39,7 @@ public class UsersController: ControllerBase
     {
         try
         {
-            User user = await _userRepository.GetSingleAsync(id);  
+            User user = await _userRepository.GetSingleUserAsync(id);  
             UserDto dto = new()
             {
                 Id = user.Id,           
@@ -59,7 +59,7 @@ public class UsersController: ControllerBase
         try
         {
             //starting with all users
-            var usersQuery = _userRepository.GetManyAsync();
+            var usersQuery = _userRepository.GetManyUsersAsync();
             
             //is username is provided...
             if (!string.IsNullOrEmpty(username))
@@ -92,7 +92,7 @@ public class UsersController: ControllerBase
     {
         try
         {
-            User existingUser = await _userRepository.GetSingleAsync(id);
+            User existingUser = await _userRepository.GetSingleUserAsync(id);
         
             // FIRST: Verify username is available (if it's changing)
             if (!string.IsNullOrWhiteSpace(request.Username) && 
@@ -112,7 +112,7 @@ public class UsersController: ControllerBase
                 existingUser.Password = request.Password;
             }
         
-            await _userRepository.UpdateAsync(existingUser);
+            await _userRepository.UpdateUserAsync(existingUser);
             return NoContent();
         }
         catch (Exception e)
@@ -128,8 +128,8 @@ public class UsersController: ControllerBase
         try
         {
             // Step 1: Delete the user
-            User user =  await _userRepository.GetSingleAsync(id);
-            await _userRepository.DeleteAsync(id);
+            User user =  await _userRepository.GetSingleUserAsync(id);
+            await _userRepository.DeleteUserAsync(id);
         
             // Step 2: Return success
             return NoContent(); // 204 No Content
@@ -144,7 +144,7 @@ public class UsersController: ControllerBase
     private async Task VerifyUserNameIsAvailableAsync(string userName)
     {
         bool exists = _userRepository
-            .GetManyAsync()
+            .GetManyUsersAsync()
             .Any(u => string.Equals(u.Username, userName, StringComparison.OrdinalIgnoreCase));
 
         if (exists)
