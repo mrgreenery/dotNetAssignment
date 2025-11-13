@@ -1,0 +1,130 @@
+﻿@page "/users"
+@inject IUserService UserService
+@using BlazorApp.Services
+@using ApiContract
+@rendermode InteractiveServer
+
+<PageTitle>Users</PageTitle>
+
+<h1>Users</h1>
+
+<!-- Add User Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h3>Add New User</h3>
+        <div class="mb-3">
+            <label class="form-label">Username:</label>
+            <input type="text" class="form-control" @bind="newUsername" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Password:</label>
+            <input type="password" class="form-control" @bind="newPassword" />
+        </div>
+        <button class="btn btn-primary" @onclick="AddUser">Add User</button>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger mt-2">@errorMessage</div>
+        }
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success mt-2">@successMessage</div>
+        }
+    </div>
+</div>
+
+<!-- Users List -->
+<h3>All Users</h3>
+
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (users.Count == 0)
+{
+    <p>No users found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.UserName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<UserDto>? users;
+    private string newUsername = "";
+    private string newPassword = "";
+    private string errorMessage = "";
+    private string successMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await UserService.GetUsersAsync(null);
+    }
+
+    private async Task AddUser()
+    {
+        // Clear previous messages
+        errorMessage = "";
+        successMessage = "";
+
+        // Validate input
+        if (string.IsNullOrWhiteSpace(newUsername))
+        {
+            errorMessage = "Username is required.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(newPassword))
+        {
+            errorMessage = "Password is required.";
+            return;
+        }
+
+        try
+        {
+            // Create the DTO
+            CreateUserDto dto = new CreateUserDto
+            {
+                UserName = newUsername,
+                Password = newPassword
+            };
+
+            // Call the service
+            await UserService.AddUserAsync(dto);
+
+            // Show success message
+            successMessage = $"User '{newUsername}' created successfully!";
+
+            // Clear the form
+            newUsername = "";
+            newPassword = "";
+
+            // Reload the users list
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+}

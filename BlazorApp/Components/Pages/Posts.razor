@@ -1,0 +1,166 @@
+﻿@page "/posts"
+@inject IPostService PostService
+@inject IUserService UserService
+@using BlazorApp.Services
+@using ApiContract
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Posts</PageTitle>
+
+<h1>Posts</h1>
+
+<!-- Create Post Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h3>Create New Post</h3>
+        <div class="mb-3">
+            <label class="form-label">Title:</label>
+            <input type="text" class="form-control" @bind="newTitle" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Body:</label>
+            <textarea class="form-control" rows="5" @bind="newBody"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Author:</label>
+            <select class="form-select" @bind="selectedUserId">
+                <option value="0">-- Select User --</option>
+                @if (users != null)
+                {
+                    @foreach (var user in users)
+                    {
+                        <option value="@user.Id">@user.UserName</option>
+                    }
+                }
+            </select>
+        </div>
+        <button class="btn btn-primary" @onclick="CreatePost">Create Post</button>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger mt-2">@errorMessage</div>
+        }
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success mt-2">@successMessage</div>
+        }
+    </div>
+</div>
+
+<!-- Posts List -->
+<h3>All Posts</h3>
+
+@if (posts == null || users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (posts.Count == 0)
+{
+    <p>No posts found.</p>
+}
+else
+{
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var post in posts)
+            {
+                var author = users.FirstOrDefault(u => u.Id == post.UserId);
+                <tr style="cursor: pointer;" @onclick="() => ViewPost(post.Id)">
+                    <td>@post.Id</td>
+                    <td>@post.Title</td>
+                    <td>@(author?.UserName ?? $"User #{post.UserId}")</td>
+                    <td>@post.Created.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<PostDto>? posts;
+    private List<UserDto>? users;
+    
+    private string newTitle = "";
+    private string newBody = "";
+    private int selectedUserId = 0;
+    private string errorMessage = "";
+    private string successMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        posts = await PostService.GetPostsAsync(null, null);
+        users = await UserService.GetUsersAsync(null);
+    }
+
+    private async Task CreatePost()
+    {
+        // Clear previous messages
+        errorMessage = "";
+        successMessage = "";
+
+        // Validate input
+        if (string.IsNullOrWhiteSpace(newTitle))
+        {
+            errorMessage = "Title is required.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(newBody))
+        {
+            errorMessage = "Body is required.";
+            return;
+        }
+
+        if (selectedUserId == 0)
+        {
+            errorMessage = "Please select an author.";
+            return;
+        }
+
+        try
+        {
+            // Create the DTO
+            CreatePostDto dto = new CreatePostDto
+            {
+                Title = newTitle,
+                Body = newBody,
+                UserId = selectedUserId
+            };
+
+            // Call the service
+            await PostService.AddPostAsync(dto);
+
+            // Show success message
+            successMessage = $"Post '{newTitle}' created successfully!";
+
+            // Clear the form
+            newTitle = "";
+            newBody = "";
+            selectedUserId = 0;
+
+            // Reload the posts list
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+    private void ViewPost(int postId)
+    {
+        Navigation.NavigateTo($"/posts/{postId}");
+    }
+}

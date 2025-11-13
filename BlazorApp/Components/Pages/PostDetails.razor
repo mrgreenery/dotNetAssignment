@@ -1,0 +1,197 @@
+@page "/posts/{PostId:int}"
+@inject IPostService PostService
+@inject ICommentService CommentService
+@inject IUserService UserService
+@inject NavigationManager Navigation
+@using BlazorApp.Services
+@using ApiContract
+@rendermode InteractiveServer
+
+<PageTitle>Post Details</PageTitle>
+
+<button class="btn btn-secondary mb-3" @onclick="GoBack">← Back to Posts</button>
+
+@if (post == null || users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <!-- Post Details -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2>@post.Title</h2>
+            <p class="text-muted">
+                By @(users.FirstOrDefault(u => u.Id == post.UserId)?.UserName ?? $"User #{post.UserId}") 
+                | Created: @post.Created.ToShortDateString()
+            </p>
+            <hr/>
+            <p>@post.Body</p>
+        </div>
+    </div>
+
+    <!-- Add Comment Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4>Add a Comment</h4>
+            <div class="mb-3">
+                <label class="form-label">Your Name:</label>
+                <select class="form-select" @bind="selectedUserId">
+                    <option value="0">-- Select User --</option>
+                    @foreach (var user in users)
+                    {
+                        <option value="@user.Id">@user.UserName</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Comment Title:</label>
+                <input type="text" class="form-control" @bind="newCommentTitle" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Comment:</label>
+                <textarea class="form-control" rows="3" @bind="newCommentBody"></textarea>
+            </div>
+            <button class="btn btn-primary" @onclick="AddComment">Post Comment</button>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-2">@errorMessage</div>
+            }
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success mt-2">@successMessage</div>
+            }
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="card">
+        <div class="card-body">
+            <h4>Comments (@comments?.Count ?? 0)</h4>
+            <hr/>
+            @if (comments == null)
+            {
+                <p><em>Loading comments...</em></p>
+            }
+            else if (comments.Count == 0)
+            {
+                <p>No comments yet. Be the first to comment!</p>
+            }
+            else
+            {
+                @foreach (var comment in comments.OrderByDescending(c => c.Created))
+                {
+                    var commentAuthor = users.FirstOrDefault(u => u.Id == comment.UserId);
+                    <div class="border-bottom pb-3 mb-3">
+                        <h5>@comment.Title</h5>
+                        <p class="text-muted small">
+                            By @(commentAuthor?.UserName ?? $"User #{comment.UserId}") 
+                            | @comment.Created.ToShortDateString()
+                        </p>
+                        <p>@comment.Body</p>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int PostId { get; set; }
+
+    private PostDto? post;
+    private List<CommentDto>? comments;
+    private List<UserDto>? users;
+
+    private int selectedUserId = 0;
+    private string newCommentTitle = "";
+    private string newCommentBody = "";
+    private string errorMessage = "";
+    private string successMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            // Load post
+            post = await PostService.GetPostAsync(PostId);
+            
+            // Load all users (for author names)
+            users = await UserService.GetUsersAsync(null);
+            
+            // Load comments for this post
+            comments = await CommentService.GetCommentsAsync(null, PostId);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading post: {ex.Message}";
+        }
+    }
+
+    private async Task AddComment()
+    {
+        // Clear previous messages
+        errorMessage = "";
+        successMessage = "";
+
+        // Validate input
+        if (selectedUserId == 0)
+        {
+            errorMessage = "Please select a user.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(newCommentTitle))
+        {
+            errorMessage = "Comment title is required.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(newCommentBody))
+        {
+            errorMessage = "Comment body is required.";
+            return;
+        }
+
+        try
+        {
+            // Create the DTO
+            CreateCommentDto dto = new CreateCommentDto
+            {
+                Title = newCommentTitle,
+                Body = newCommentBody,
+                UserId = selectedUserId,
+                PostId = PostId
+            };
+
+            // Call the service
+            await CommentService.AddComment(dto);
+
+            // Show success message
+            successMessage = "Comment added successfully!";
+
+            // Clear the form
+            newCommentTitle = "";
+            newCommentBody = "";
+            selectedUserId = 0;
+
+            // Reload comments
+            comments = await CommentService.GetCommentsAsync(null, PostId);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/posts");
+    }
+}
