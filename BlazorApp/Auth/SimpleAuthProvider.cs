@@ -11,7 +11,7 @@ public class SimpleAuthProvider : AuthenticationStateProvider
     private readonly HttpClient httpClient;
     private readonly IJSRuntime jsRuntime;
 
-    public SimpleAuthProvider(HttpClient http0Client,  IJSRuntime jsRuntime)
+    public SimpleAuthProvider(HttpClient httpClient,  IJSRuntime jsRuntime)
     {
         this.httpClient = httpClient;
         this.jsRuntime = jsRuntime;
@@ -24,6 +24,9 @@ public class SimpleAuthProvider : AuthenticationStateProvider
             new UserLoginDto { Username = userName, Password = password });
 
         string content = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"HttpClient BaseAddress: {httpClient.BaseAddress}"); 
+        Console.WriteLine($"Response status: {response.StatusCode}");  // ← Voeg toe
+        Console.WriteLine($"Response content: {content}");              // ← Voeg toe
         if (!response.IsSuccessStatusCode)
         {
             throw new Exception(content);

@@ -7,7 +7,7 @@ using RepositoryContracts;
 namespace WebAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private IUserRepository _userRepository;
@@ -17,15 +17,26 @@ public class AuthController : ControllerBase
         _userRepository = userRepository;
     }
 
-    [HttpPost("auth/login")]
+    [HttpPost("login")]
     public async Task<ActionResult<UserDto>> ValidateUser([FromBody] UserLoginDto request)
     {
-            //find user by username
-            User? user = _userRepository.GetManyUsersAsync()
-                .FirstOrDefault(u => u.Username.Equals(request.Username, StringComparison.OrdinalIgnoreCase));
+
+        Console.WriteLine($"Login attempt for username: '{request.Username}'"); //testing
+        var allUsers = _userRepository.GetManyUsersAsync().ToList(); 
+        Console.WriteLine($"Total users in repository: {allUsers.Count}");
+        foreach (var u in allUsers)
+        {
+            Console.WriteLine($"  User: '{u.Username}'");
+        }
+        
+        //find user by username
+        
+        User? user = _userRepository.GetManyUsersAsync()
+            .FirstOrDefault(u => u.Username.Equals(request.Username, StringComparison.OrdinalIgnoreCase));
             
-            //if user does not exist, return error code
-            if (user == null)
+            
+        //if user does not exist, return error code
+        if (user == null)
             {
                 return Unauthorized("User not found");
             }
