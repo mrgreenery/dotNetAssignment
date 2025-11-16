@@ -17,7 +17,7 @@ public class AuthController : ControllerBase
         _userRepository = userRepository;
     }
 
-    [HttpPost("login")]
+    [HttpPost("auth/login")]
     public async Task<ActionResult<UserDto>> ValidateUser([FromBody] UserLoginDto request)
     {
             //find user by username
