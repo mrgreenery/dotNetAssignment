@@ -3,6 +3,7 @@ using Entities;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContracts;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Controllers;
 
@@ -52,27 +53,51 @@ public class PostsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<PostDto>> GetPost(int id)
+    public async Task<ActionResult<PostDto>> GetPost(
+        [FromRoute] int id,
+        [FromQuery] bool includeAuthor = false,
+        [FromQuery] bool includeComments = false)
     {
-        try
+        IQueryable<Post> query = _postRepository
+            .GetManyPostsAsync()
+            .Where(p => p.Id == id);
+            
+        if (includeAuthor)
         {
-            Post post = await _postRepository.GetSinglePostAsync(id);
-            PostDto dto = new()
+            query = query.Include(p => p.User);
+        }
+        
+        if (includeComments)
+        {
+            query = query.Include(p => p.Comments);
+        }
+
+        PostDto? postDto = await query.Select(post => new PostDto()
             {
                 Id = post.Id,
                 Title = post.Title,
                 Body = post.Body,
                 UserId = post.UserId,
-                Created = post.Created,
-                Updated = post.Updated
-            };
+                Author = includeAuthor
+                    ? new UserDto
+                    {
+                        Id = post.User.Id,
+                        UserName = post.User.Username
+                    }
+                    : null,
+                Comments = includeComments
+                    ? post.Comments.Select(c => new CommentDto
+                    {
+                        Id = c.Id,
+                        Title = c.Title,
+                        Body = c.Body,
+                        UserId = c.UserId
+                    }).ToList()
+                    : new()
+            })
+            .FirstOrDefaultAsync();
 
-            return Ok(dto);
-        }
-        catch (Exception e)
-        {
-          return NotFound(e.Message);
-        }
+        return postDto == null ? NotFound() : Ok(postDto);
     }
 
     [HttpGet]
@@ -94,8 +119,7 @@ public class PostsController : ControllerBase
                 postsQuery = postsQuery.Where(p => p.UserId == userId.Value);
             }
 
-            List<PostDto> postDtos = postsQuery
-                .AsEnumerable()
+            List<PostDto> postDtos = await postsQuery
                 .Select(p => new PostDto
                 {
                     Id = p.Id,
@@ -105,7 +129,7 @@ public class PostsController : ControllerBase
                     Created = p.Created,
                     Updated = p.Updated
                 })
-                .ToList();
+                .ToListAsync();
 
             return Ok(postDtos);
         }

@@ -9,4 +9,6 @@ public class CommentDto
     public DateTime Updated { get; set; }
     public int UserId { get; set; }
     public int PostId { get; set; }
+    
+    
 }

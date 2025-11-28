@@ -9,11 +9,13 @@ public class User
     public string Password { get; set; } = "";
     
     [JsonConstructor]
-    public User() { }
-    
     public User(string username, string password)
     {
         Username = username;
         Password = password;
     }
+    private User(){}
+    
+    public List<Post> Posts { get; set; } = new();
+    public List<Comment> Comments { get; set; } = new();
 }

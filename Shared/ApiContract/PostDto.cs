@@ -8,4 +8,7 @@ public class PostDto
     public DateTime Created { get; set; }
     public DateTime Updated { get; set; }
     public int UserId { get; set; }
+    
+    public UserDto? Author { get; set; }
+    public List<CommentDto>? Comments { get; set; } 
 }

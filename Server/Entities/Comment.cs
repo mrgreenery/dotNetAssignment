@@ -8,5 +8,7 @@ public class Comment
     public DateTime Created { get; set; }
     public DateTime Updated { get; set; }
     public int UserId { get; set; }
+    public User User { get; set; }
     public int PostId { get; set; }
+    public Post Post { get; set; }
 }

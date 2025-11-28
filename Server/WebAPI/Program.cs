@@ -1,5 +1,7 @@
+using EfcRepositories;
 using FileRepositories;
 using RepositoryContracts;
+using AppContext = EfcRepositories.AppContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +12,10 @@ builder.Services.AddControllers();
 // builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IPostRepository, PostFileRepository>();
-builder.Services.AddScoped<IUserRepository, UserFileRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentFileRepository>();
+builder.Services.AddScoped<IPostRepository, EfcPostRepository>();
+builder.Services.AddScoped<IUserRepository, EfcUserRepository>();
+builder.Services.AddScoped<ICommentRepository, EfcCommentRepository>();
+builder.Services.AddDbContext<AppContext>();
 
 var app = builder.Build();
 

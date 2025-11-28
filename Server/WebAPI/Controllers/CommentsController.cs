@@ -3,6 +3,7 @@ using Entities;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContracts;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Controllers;
 
@@ -97,8 +98,7 @@ public class CommentsController : ControllerBase
                 commentsQuery = commentsQuery.Where(c => c.PostId == postId.Value);
             }
 
-            List<CommentDto> commentDtos = commentsQuery
-                .AsEnumerable()
+            List<CommentDto> commentDtos = await commentsQuery
                 .Select(c => new CommentDto
                 {
                     Id = c.Id,
@@ -109,7 +109,7 @@ public class CommentsController : ControllerBase
                     Created = c.Created,
                     Updated = c.Updated
                 })
-                .ToList();
+                .ToListAsync();
 
             return Ok(commentDtos);
         }

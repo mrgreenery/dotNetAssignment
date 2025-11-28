@@ -4,6 +4,7 @@ using Entities;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContracts;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Controllers;
 
@@ -64,18 +65,17 @@ public class UsersController: ControllerBase
             //is username is provided...
             if (!string.IsNullOrEmpty(username))
             {
-                usersQuery = usersQuery.Where(u => u.Username.Contains(username, StringComparison.OrdinalIgnoreCase));
+                usersQuery = usersQuery.Where(u => u.Username.ToLower().Contains(username.ToLower()));
             }
             
             //transform to dto and to list
-            List<UserDto> userDtos = usersQuery
-                .AsEnumerable()
+            List<UserDto> userDtos = await usersQuery
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
                     UserName = u.Username
                 })
-                .ToList<UserDto>();
+                .ToListAsync<UserDto>();
             
             return Ok(userDtos);
 
@@ -96,7 +96,7 @@ public class UsersController: ControllerBase
         
             // FIRST: Verify username is available (if it's changing)
             if (!string.IsNullOrWhiteSpace(request.Username) && 
-                !string.Equals(existingUser.Username, request.Username, StringComparison.OrdinalIgnoreCase))
+                existingUser.Username.ToLower() != request.Username.ToLower())
             {
                 await VerifyUserNameIsAvailableAsync(request.Username);
             }
@@ -145,7 +145,7 @@ public class UsersController: ControllerBase
     {
         bool exists = _userRepository
             .GetManyUsersAsync()
-            .Any(u => string.Equals(u.Username, userName, StringComparison.OrdinalIgnoreCase));
+            .Any(u => u.Username.ToLower() == userName.ToLower());
 
         if (exists)
         {
