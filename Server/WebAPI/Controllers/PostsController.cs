@@ -72,6 +72,10 @@ public class PostsController : ControllerBase
             query = query.Include(p => p.Comments);
         }
 
+        var testPost = await query.FirstOrDefaultAsync();
+        Console.WriteLine($"User loaded? {testPost?.User != null}");
+        Console.WriteLine($"Username: {testPost?.User?.Username}");
+        
         PostDto? postDto = await query.Select(post => new PostDto()
             {
                 Id = post.Id,

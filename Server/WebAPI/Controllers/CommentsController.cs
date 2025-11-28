@@ -55,28 +55,53 @@ public class CommentsController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<CommentDto>> GetComment(int id)
+    public async Task<ActionResult<CommentDto>> GetComment(
+        [FromRoute] int id,
+        [FromQuery] bool includeAuthor = false,
+        [FromQuery] bool includePost = false)
     {
-        try
+        IQueryable<Comment> query = _commentRepository
+            .GetManyCommentsAsync()
+            .Where(c => c.Id == id);
+        
+        if (includeAuthor)
         {
-            Comment comment = await _commentRepository.GetSingleCommentAsync(id);
-            CommentDto dto = new CommentDto
-            {
-                Id = comment.Id,
-                Title = comment.Title,
-                Body = comment.Body,
-                UserId = comment.UserId,
-                PostId = comment.PostId,
-                Created = comment.Created,
-                Updated = comment.Updated
-            };
+            query = query.Include(c => c.User);
+        }
+        
+        if (includePost)
+        {
+            query = query.Include(c => c.Post);
+        }
 
-            return Ok(dto);
-        }
-        catch (Exception e)
+        CommentDto? dto = await query.Select(comment => new CommentDto
         {
-            return NotFound(e.Message);
-        }
+            Id = comment.Id,
+            Title = comment.Title,
+            Body = comment.Body,
+            UserId = comment.UserId,
+            PostId = comment.PostId,
+            Author = includeAuthor
+                ? new UserDto
+                {
+                    Id = comment.User.Id,
+                    UserName = comment.User.Username
+                }
+                : null,
+            Post = includePost
+                ? new PostDto
+                {
+                    Id = comment.Post.Id,
+                    Title = comment.Post.Title,
+                    Body = comment.Post.Body,
+                    UserId = comment.Post.UserId,
+                    Created = comment.Post.Created,
+                    Updated = comment.Post.Updated
+                }
+                : null
+
+        }).FirstOrDefaultAsync();
+        return dto == null ? NotFound() : Ok(dto);
     }
 
     [HttpGet]

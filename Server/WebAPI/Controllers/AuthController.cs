@@ -2,6 +2,7 @@ using ApiContract;
 using BlazorApp.Services;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 
 namespace WebAPI.Controllers;
@@ -31,8 +32,8 @@ public class AuthController : ControllerBase
         
         //find user by username
         
-        User? user = _userRepository.GetManyUsersAsync()
-            .FirstOrDefault(u => u.Username.Equals(request.Username, StringComparison.OrdinalIgnoreCase));
+        User? user = await _userRepository.GetManyUsersAsync()
+            .FirstOrDefaultAsync(u => u.Username.ToLower() == request.Username.ToLower());
             
             
         //if user does not exist, return error code
