@@ -25,8 +25,8 @@ public class SimpleAuthProvider : AuthenticationStateProvider
 
         string content = await response.Content.ReadAsStringAsync();
         Console.WriteLine($"HttpClient BaseAddress: {httpClient.BaseAddress}"); 
-        Console.WriteLine($"Response status: {response.StatusCode}");  // ← Voeg toe
-        Console.WriteLine($"Response content: {content}");              // ← Voeg toe
+        Console.WriteLine($"Response status: {response.StatusCode}");  
+        Console.WriteLine($"Response content: {content}");             
         if (!response.IsSuccessStatusCode)
         {
             throw new Exception(content);
