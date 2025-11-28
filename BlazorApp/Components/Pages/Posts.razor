@@ -1,4 +1,5 @@
 ﻿@page "/posts"
+@attribute [Authorize]
 @inject IPostService PostService
 @inject IUserService UserService
 @using BlazorApp.Services
@@ -9,6 +10,7 @@
 <PageTitle>Posts</PageTitle>
 
 <h1>Posts</h1>
+
 
 <!-- Create Post Form -->
 <div class="card mb-4">
@@ -22,19 +24,7 @@
             <label class="form-label">Body:</label>
             <textarea class="form-control" rows="5" @bind="newBody"></textarea>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Author:</label>
-            <select class="form-select" @bind="selectedUserId">
-                <option value="0">-- Select User --</option>
-                @if (users != null)
-                {
-                    @foreach (var user in users)
-                    {
-                        <option value="@user.Id">@user.UserName</option>
-                    }
-                }
-            </select>
-        </div>
+        <!-- REMOVED: User selection dropdown -->
         <button class="btn btn-primary" @onclick="CreatePost">Create Post</button>
         @if (!string.IsNullOrEmpty(errorMessage))
         {
@@ -85,17 +75,29 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!;
+    
     private List<PostDto>? posts;
     private List<UserDto>? users;
     
     private string newTitle = "";
     private string newBody = "";
-    private int selectedUserId = 0;
+    private int loggedInUserId = 0;
     private string errorMessage = "";
     private string successMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
+        // Get the logged-in user's ID
+        var authState = await AuthState;
+        var userIdClaim = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        
+        if (userIdClaim != null)
+        {
+            loggedInUserId = int.Parse(userIdClaim.Value);
+        }
+        
         await LoadData();
     }
 
@@ -124,20 +126,14 @@ else
             return;
         }
 
-        if (selectedUserId == 0)
-        {
-            errorMessage = "Please select an author.";
-            return;
-        }
-
         try
         {
-            // Create the DTO
+            // Create the DTO using logged-in user
             CreatePostDto dto = new CreatePostDto
             {
                 Title = newTitle,
                 Body = newBody,
-                UserId = selectedUserId
+                UserId = loggedInUserId  // Using authenticated user!
             };
 
             // Call the service
@@ -149,7 +145,6 @@ else
             // Clear the form
             newTitle = "";
             newBody = "";
-            selectedUserId = 0;
 
             // Reload the posts list
             await LoadData();
@@ -159,8 +154,10 @@ else
             errorMessage = $"Error: {ex.Message}";
         }
     }
+    
     private void ViewPost(int postId)
     {
         Navigation.NavigateTo($"/posts/{postId}");
     }
+
 }

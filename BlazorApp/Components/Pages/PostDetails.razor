@@ -1,4 +1,5 @@
 @page "/posts/{PostId:int}"
+@attribute [Authorize]
 @inject IPostService PostService
 @inject ICommentService CommentService
 @inject IUserService UserService
@@ -34,16 +35,7 @@ else
     <div class="card mb-4">
         <div class="card-body">
             <h4>Add a Comment</h4>
-            <div class="mb-3">
-                <label class="form-label">Your Name:</label>
-                <select class="form-select" @bind="selectedUserId">
-                    <option value="0">-- Select User --</option>
-                    @foreach (var user in users)
-                    {
-                        <option value="@user.Id">@user.UserName</option>
-                    }
-                </select>
-            </div>
+            <!-- REMOVED: User selection dropdown -->
             <div class="mb-3">
                 <label class="form-label">Comment Title:</label>
                 <input type="text" class="form-control" @bind="newCommentTitle" />
@@ -100,11 +92,14 @@ else
     [Parameter]
     public int PostId { get; set; }
 
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthState { get; set; } = null!;
+
     private PostDto? post;
     private List<CommentDto>? comments;
     private List<UserDto>? users;
 
-    private int selectedUserId = 0;
+    private int loggedInUserId = 0;
     private string newCommentTitle = "";
     private string newCommentBody = "";
     private string errorMessage = "";
@@ -112,6 +107,15 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        // Get the logged-in user's ID
+        var authState = await AuthState;
+        var userIdClaim = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        
+        if (userIdClaim != null)
+        {
+            loggedInUserId = int.Parse(userIdClaim.Value);
+        }
+        
         await LoadData();
     }
 
@@ -141,12 +145,6 @@ else
         successMessage = "";
 
         // Validate input
-        if (selectedUserId == 0)
-        {
-            errorMessage = "Please select a user.";
-            return;
-        }
-
         if (string.IsNullOrWhiteSpace(newCommentTitle))
         {
             errorMessage = "Comment title is required.";
@@ -161,12 +159,12 @@ else
 
         try
         {
-            // Create the DTO
+            // Create the DTO using logged-in user
             CreateCommentDto dto = new CreateCommentDto
             {
                 Title = newCommentTitle,
                 Body = newCommentBody,
-                UserId = selectedUserId,
+                UserId = loggedInUserId,  // Using authenticated user!
                 PostId = PostId
             };
 
@@ -179,7 +177,6 @@ else
             // Clear the form
             newCommentTitle = "";
             newCommentBody = "";
-            selectedUserId = 0;
 
             // Reload comments
             comments = await CommentService.GetCommentsAsync(null, PostId);
