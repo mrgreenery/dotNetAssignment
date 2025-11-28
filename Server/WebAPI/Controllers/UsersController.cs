@@ -36,22 +36,56 @@ public class UsersController: ControllerBase
     }
 
     [HttpGet("{id}")]  
-    public async Task<ActionResult<UserDto>> GetUser(int id)  
+    public async Task<ActionResult<UserDto>> GetUser(
+        [FromRoute] int id, 
+        [FromQuery] bool includePosts = false,
+        [FromQuery] bool includeComments = false)  
     {
-        try
+        IQueryable<User> query = _userRepository
+            .GetManyUsersAsync()
+            .Where(u => u.Id == id);
+
+        if (includePosts)
         {
-            User user = await _userRepository.GetSingleUserAsync(id);  
-            UserDto dto = new()
+            query = query.Include(u => u.Posts);
+        }
+        
+        if (includeComments)
+        {
+            query = query.Include(u => u.Comments);
+        }
+        
+        UserDto? userDto = await query.Select(user => new UserDto()
+        {
+            Id = user.Id,
+            UserName = user.Username,
+            Posts = includePosts
+            ? user.Posts.Select(p => new PostDto
             {
-                Id = user.Id,           
-                UserName = user.Username
-            };
-            return Ok(dto);
-        }
-        catch (Exception e)
-        {
-            return NotFound(e.Message);
-        }
+            Id = p.Id,
+            Title = p.Title,
+            Body = p.Body,
+            UserId = p.UserId,
+            Created = p.Created,
+            Updated = p.Updated
+        }).ToList()
+        : null,
+        Comments = includeComments
+            ? user.Comments.Select(c => new CommentDto
+            {
+                Id = c.Id,
+                Title = c.Title,
+                Body = c.Body,
+                UserId = c.UserId,
+                PostId = c.PostId,
+                Created = c.Created,
+                Updated = c.Updated
+            }).ToList()
+            : null
+        })
+        .FirstOrDefaultAsync();
+        
+        return userDto == null ? NotFound() : Ok(userDto);
     }
 
     [HttpGet]
